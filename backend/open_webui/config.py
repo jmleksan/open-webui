@@ -606,8 +606,8 @@ def load_oauth_providers():
 
     if (
         OAUTH_CLIENT_ID.value
-        and OAUTH_CLIENT_SECRET.value
         and OPENID_PROVIDER_URL.value
+        and (OAUTH_CLIENT_SECRET.value or (OAUTH_CODE_CHALLENGE_METHOD.value and OAUTH_CODE_CHALLENGE_METHOD.value == "S256"))
     ):
 
         def oidc_oauth_register(client):
@@ -626,14 +626,18 @@ def load_oauth_providers():
                     % ("S256", OAUTH_CODE_CHALLENGE_METHOD.value)
                 )
 
-            client.register(
-                name="oidc",
-                client_id=OAUTH_CLIENT_ID.value,
-                client_secret=OAUTH_CLIENT_SECRET.value,
-                server_metadata_url=OPENID_PROVIDER_URL.value,
-                client_kwargs=client_kwargs,
-                redirect_uri=OPENID_REDIRECT_URI.value,
-            )
+            registration_params = {
+                "name": "oidc",
+                "client_id": OAUTH_CLIENT_ID.value,
+                "server_metadata_url": OPENID_PROVIDER_URL.value,
+                "client_kwargs": client_kwargs,
+                "redirect_uri": OPENID_REDIRECT_URI.value,
+            }
+
+            if OAUTH_CLIENT_SECRET.value:
+                registration_params["client_secret"] = OAUTH_CLIENT_SECRET.value
+
+            client.register(**registration_params)
 
         OAUTH_PROVIDERS["oidc"] = {
             "name": OAUTH_PROVIDER_NAME.value,
