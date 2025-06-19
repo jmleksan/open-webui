@@ -39,10 +39,16 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            type=raw,value=latest-expedient
+            type=raw,value=latest-expedient,enable={{is_default_branch}}
             type=ref,event=tag,suffix=-expedient
             type=ref,event=branch,suffix=-expedient
-            type=sha,prefix={{branch}}-,suffix=-expedient
+
+      - name: Debug - Show generated tags
+        run: |
+          echo "Generated tags:"
+          echo "${{ steps.meta.outputs.tags }}"
+          echo "Generated labels:"
+          echo "${{ steps.meta.outputs.labels }}"
 
       - name: Build and push OpenWebUI Docker image
         uses: docker/build-push-action@v5
