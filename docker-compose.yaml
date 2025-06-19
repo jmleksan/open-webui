@@ -1,34 +1,75 @@
 services:
-  ollama:
-    volumes:
-      - ollama:/root/.ollama
-    container_name: ollama
-    pull_policy: always
-    tty: true
-    restart: unless-stopped
-    image: ollama/ollama:${OLLAMA_DOCKER_TAG-latest}
 
   open-webui:
     build:
       context: .
-      args:
-        OLLAMA_BASE_URL: '/ollama'
       dockerfile: Dockerfile
     image: ghcr.io/open-webui/open-webui:${WEBUI_DOCKER_TAG-main}
     container_name: open-webui
     volumes:
       - open-webui:/app/backend/data
-    depends_on:
-      - ollama
     ports:
       - ${OPEN_WEBUI_PORT-3000}:8080
+    env_file:
+      - .env
     environment:
-      - 'OLLAMA_BASE_URL=http://ollama:11434'
-      - 'WEBUI_SECRET_KEY='
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    restart: unless-stopped
+      # - WEBUI_SECRET_KEY=
+      #- ENABLE_LOGIN_FORM=false
+      # LLMGateway Configuration
+      #- OPENAI_API_BASE_URL=http://llmgateway:8080
+      #- OPENAI_API_KEY=bq98dc87qxuvgrkcbmu8vvmjnkeumvwzf5p8
+      - OPENAI_API_BASE_URLS=${OPENAI_API_BASE_URLS}
+      - OPENAI_API_KEYS=${OPENAI_API_KEYS}
+      - ENABLE_LITELLM=True
+      # - LITELLM_PROXY_PORT=4000
+      # - LITELLM_PROXY_HOST=litellm
+      - LITELLM_PROXY_PORT=8080
+      - LITELLM_PROXY_HOST=llmgateway
+      - DEFAULT_MODEL=gpt-4.1
+      # AI CTRL Chat URL for beta opt-out script (local development)
+      - AICTRL_CHAT_URL=${AICTRL_CHAT_URL-http://localhost}
+      # Image Generation Configuration
+      - ENABLE_IMAGE_GENERATION=true
+      - IMAGE_GENERATION_ENGINE=openai
+      - IMAGES_OPENAI_API_BASE_URL=${OPENAI_API_BASE_URLS}
+      - IMAGES_OPENAI_API_KEY=${OPENAI_API_KEYS}
+      - IMAGE_GENERATION_MODEL=gpt-image-1
+      - IMAGE_SIZE=1024x1024
+      - IMAGE_STEPS=50
+      # Web Search Configuration
+      - ENABLE_WEB_SEARCH=true
+      - WEB_SEARCH_ENGINE=perplexity
+      - PERPLEXITY_API_KEY=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
+      - BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL=true
+      # # Elasticsearch Configuration
+      # - VECTOR_DB=elasticsearch
+      # - ELASTICSEARCH_URL=https://elastic-9d718b4d7a88485e8e7fb5e6b925ae67-219501.es.elastic.expedient.cloud:9243
+      # - ELASTICSEARCH_USERNAME=internal-es-user
+      # - ELASTICSEARCH_PASSWORD=3F9OmRfhPPjMWh3e4RLMfA0OR4M=
+      # - ELASTICSEARCH_INDEX_PREFIX=connector-
+      # # Optional: Add CA cert path if needed
+      # # ELASTICSEARCH_CA_CERTS=/path/to/your/ca.crt
+      # - RAG_EMBEDDING_ENGINE=openai
+      # - RAG_EMBEDDING_MODEL=text-embedding-3-small
+      # - RAG_OPENAI_API_BASE_URL=https://api.openai.com/v1/embeddings
+      # - RAG_OPENAI_API_KEY=bsk-proj-W03W_OQHlBhHksMymieu7DjrJvv2muHVmpQ5qOYmzRoYEY_17Zw9gQaeGzwdSYv36NmiFTDXZOT3BlbkFJ9Ly8dqcqBpWff62obv9hqQ3NMbyJSEMQssR7G2tJXYPwByTpMtBw5SeaahFdF_zmjCUiSqDCYA
+      # OIDC Configuration
+      - OAUTH_CLIENT_ID=bbdd61e0-bd60-013c-378c-0a1e3e4204d1173595
+      - OAUTH_CLIENT_SECRET=
+      - OPENID_PROVIDER_URL=https://expedient.onelogin.com/oidc/2/.well-known/openid-configuration
+      - OPENID_REDIRECT_URI=http://localhost:${OPEN_WEBUI_PORT-3000}/oauth/oidc/callback
+      - OAUTH_CODE_CHALLENGE_METHOD=S256
+      - ENABLE_OAUTH_SIGNUP=true
+      - OAUTH_MERGE_ACCOUNTS_BY_EMAIL=true
+      - OAUTH_ALLOW_REGISTRATION=true
+      - DEFAULT_USER_ROLE=user
+    networks:
+      - expnet
 
 volumes:
-  ollama: {}
   open-webui: {}
+
+networks:
+  expnet:
+    name: expnet
+    external: true # Assuming expnet is created externally or by another compose file (like LLMGateway's)
