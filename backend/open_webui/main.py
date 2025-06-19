@@ -367,6 +367,7 @@ from open_webui.config import (
     DEFAULT_LOCALE,
     OAUTH_PROVIDERS,
     WEBUI_URL,
+    AICTRL_CHAT_URL,
     RESPONSE_WATERMARK,
     # Admin
     ENABLE_ADMIN_CHAT_ACCESS,
@@ -622,6 +623,7 @@ app.state.config.ENABLE_DIRECT_CONNECTIONS = ENABLE_DIRECT_CONNECTIONS
 ########################################
 
 app.state.config.WEBUI_URL = WEBUI_URL
+app.state.config.AICTRL_CHAT_URL = AICTRL_CHAT_URL
 app.state.config.ENABLE_SIGNUP = ENABLE_SIGNUP
 app.state.config.ENABLE_LOGIN_FORM = ENABLE_LOGIN_FORM
 
@@ -1507,6 +1509,7 @@ async def get_app_config(request: Request):
         "name": app.state.WEBUI_NAME,
         "version": VERSION,
         "default_locale": str(DEFAULT_LOCALE),
+        "aictrl_chat_url": app.state.config.AICTRL_CHAT_URL,
         "oauth": {
             "providers": {
                 name: config.get("name", name)

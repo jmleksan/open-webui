@@ -597,7 +597,13 @@ def load_oauth_providers():
     if (
         OAUTH_CLIENT_ID.value
         and OPENID_PROVIDER_URL.value
-        and (OAUTH_CLIENT_SECRET.value or (OAUTH_CODE_CHALLENGE_METHOD.value and OAUTH_CODE_CHALLENGE_METHOD.value == "S256"))
+        and (
+            OAUTH_CLIENT_SECRET.value
+            or (
+                OAUTH_CODE_CHALLENGE_METHOD.value
+                and OAUTH_CODE_CHALLENGE_METHOD.value == "S256"
+            )
+        )
     ):
 
         def oidc_oauth_register(client):
@@ -925,6 +931,10 @@ TOOL_SERVER_CONNECTIONS = PersistentConfig(
 
 WEBUI_URL = PersistentConfig("WEBUI_URL", "webui.url", os.environ.get("WEBUI_URL", ""))
 
+# Add AICTRL_CHAT_URL for beta opt-out script
+AICTRL_CHAT_URL = PersistentConfig(
+    "AICTRL_CHAT_URL", "webui.aictrl_chat_url", os.environ.get("AICTRL_CHAT_URL", "")
+)
 
 ENABLE_SIGNUP = PersistentConfig(
     "ENABLE_SIGNUP",
@@ -1443,7 +1453,7 @@ FOLLOW_UP_GENERATION_PROMPT_TEMPLATE = PersistentConfig(
 DEFAULT_FOLLOW_UP_GENERATION_PROMPT_TEMPLATE = """### Task:
 Suggest 3-5 relevant follow-up questions or prompts that the user might naturally ask next in this conversation as a **user**, based on the chat history, to help continue or deepen the discussion.
 ### Guidelines:
-- Write all follow-up questions from the user’s point of view, directed to the assistant.
+- Write all follow-up questions from the user's point of view, directed to the assistant.
 - Make questions concise, clear, and directly related to the discussed topic(s).
 - Only suggest follow-ups that make sense given the chat content and do not repeat what was already covered.
 - If the conversation is very short or not specific, suggest more general (but relevant) follow-ups the user might ask.

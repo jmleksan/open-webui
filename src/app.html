@@ -102,6 +102,33 @@
 			})();
 		</script>
 
+		<!-- AI CTRL Beta Opt-Out Script -->
+		<script>
+			(async function() {
+				try {
+					// Fetch backend configuration to get AICTRL_CHAT_URL
+					const response = await fetch('/api/config');
+					if (response.ok) {
+						const config = await response.json();
+						const aictrlChatUrl = config.aictrl_chat_url;
+						
+						if (aictrlChatUrl) {
+							// Dynamically load the beta opt-out script
+							const script = document.createElement('script');
+							script.src = aictrlChatUrl + '/beta-opt-out.js';
+							script.async = true;
+							script.onerror = function() {
+								console.warn('Failed to load AI CTRL beta opt-out script from: ' + this.src);
+							};
+							document.head.appendChild(script);
+						}
+					}
+				} catch (error) {
+					console.warn('Failed to load AI CTRL beta opt-out configuration:', error);
+				}
+			})();
+		</script>
+
 		<title>Open WebUI</title>
 
 		%sveltekit.head%
